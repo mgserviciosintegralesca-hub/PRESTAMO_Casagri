@@ -6,8 +6,8 @@ import { Receipt, Search, Filter, Download, Calendar, Loader2, User, Landmark, W
 import { motion, AnimatePresence } from 'motion/react';
 import { formatUSD, formatEUR, formatCurrency, cn, getLoanRemainingBalance } from '../lib/utils';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import ConfirmationModal from './ConfirmationModal';
+import autoTableImport from 'jspdf-autotable';
+const autoTable = autoTableImport as any;
 
 interface Props {
   settings: SystemSettings | null;

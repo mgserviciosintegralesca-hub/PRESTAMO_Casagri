@@ -10,8 +10,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { formatUSD, formatEUR, formatCurrency, cn } from '../lib/utils';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-
+import autoTableImport from 'jspdf-autotable';
+const autoTable = autoTableImport as any;
 interface Props {
   onClose: () => void;
   settings: SystemSettings | null;
@@ -89,7 +89,7 @@ export default function GlobalAuditModal({ onClose, settings }: Props) {
     doc.text(`Empresa: ${settings?.companyName || 'SISTEMA DE PRESTAMOS'}`, 14, 20);
 
     // Summary Table
-    autoTable(doc, {
+    (doc as any).autoTable({
       startY: 25,
       head: [['Métrica', 'USD ($)', 'EUR (€)']],
       body: [
