@@ -527,6 +527,7 @@ function WorkerModal({ workerToEdit, onClose }: WorkerModalProps) {
     department: workerToEdit?.department || '',
     cargo: workerToEdit?.cargo || '',
     sucursal: workerToEdit?.sucursal || '',
+    role: workerToEdit?.role || UserRole.EMPLOYEE,
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -561,7 +562,7 @@ function WorkerModal({ workerToEdit, onClose }: WorkerModalProps) {
           department: formData.department.trim(),
           cargo: formData.cargo.trim(),
           sucursal: sucursalClean,
-          role: workerToEdit.role || UserRole.EMPLOYEE,
+          role: formData.role,
           createdAt: workerToEdit.createdAt || new Date().toISOString()
         }, { merge: true });
       } else {
@@ -574,7 +575,7 @@ function WorkerModal({ workerToEdit, onClose }: WorkerModalProps) {
           department: formData.department.trim(),
           cargo: formData.cargo.trim(),
           sucursal: sucursalClean,
-          role: UserRole.EMPLOYEE,
+          role: formData.role,
           createdAt: new Date().toISOString()
         });
       }
@@ -651,25 +652,39 @@ function WorkerModal({ workerToEdit, onClose }: WorkerModalProps) {
               ))}
             </select>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Departamento</label>
-            <input
-              type="text"
-              value={formData.department}
-              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none uppercase"
-              placeholder="Ej. ADMINISTRACIÓN, TECNOLOGÍA..."
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Departamento</label>
+              <input
+                type="text"
+                value={formData.department}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none uppercase"
+                placeholder="ADMINISTRACIÓN..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cargo / Puesto</label>
+              <input
+                type="text"
+                value={formData.cargo}
+                onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none uppercase"
+                placeholder="ANALISTA..."
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Cargo / Puesto</label>
-            <input
-              type="text"
-              value={formData.cargo}
-              onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none uppercase"
-              placeholder="Ej. ANALISTA, COORDINADOR, GERENTE..."
-            />
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Rol / Perfil de Acceso</label>
+            <select
+              required
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs font-bold outline-none"
+            >
+              <option value={UserRole.EMPLOYEE}>USUARIO BASE (EMPLEADO/LIMITE)</option>
+              <option value={UserRole.ADMIN}>ADMINISTRADOR (ACCESO TOTAL)</option>
+            </select>
           </div>
           
           <div className="pt-4 flex gap-3">

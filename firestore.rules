@@ -1,65 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    function isBootstrap() {
-      return isSignedIn() && (request.auth.token.email == 'cesar.guaimare@gmail.com');
-    }
-
-    function isAdmin() {
-      return isBootstrap() || (isSignedIn() && 
-             exists(/databases/$(database)/documents/workers/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/workers/$(request.auth.uid)).data.role == 'admin');
-    }
-
-    // Bootstrap Override - VERY IMPORTANT
     match /{document=**} {
-      allow read, write: if isBootstrap();
-    }
-
-    // Settings
-    match /settings/global {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
-
-    // Workers
-    match /workers/{workerId} {
-      allow read: if isSignedIn() && (request.auth.uid == workerId || isAdmin() || resource.data.role == 'admin');
-      allow write: if isAdmin() || (isSignedIn() && request.auth.uid == workerId);
-    }
-
-    // Loans
-    match /loans/{loanId} {
-      allow read: if isSignedIn() && (isAdmin() || (resource != null && resource.data.workerId == request.auth.uid));
-      allow create: if isAdmin() || (isSignedIn() && request.resource.data.workerId == request.auth.uid);
-      allow update: if isAdmin(); // Only admins can update loans (approve/reject)
-      allow delete: if isAdmin();
-    }
-
-    // Payments
-    match /loans/{loanId}/payments/{paymentId} {
-      allow read: if isSignedIn() && (isAdmin() || (exists(/databases/$(database)/documents/loans/$(loanId)) && get(/databases/$(database)/documents/loans/$(loanId)).data.workerId == request.auth.uid));
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
-    }
-
-    // Motives
-    match /motives/{motiveId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
-
-    // Notifications
-    match /notifications/{notificationId} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
-      allow create: if isSignedIn();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
   }
 }

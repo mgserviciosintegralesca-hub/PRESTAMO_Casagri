@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from './lib/firebase';
-import { 
-  onAuthStateChanged, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  signOut,
-  User as FirebaseUser 
-} from 'firebase/auth';
+import { db } from './lib/firebase';
 import { 
   doc, 
-  getDoc, 
   setDoc, 
-  collection, 
   onSnapshot 
 } from 'firebase/firestore';
 import { UserRole, Worker, SystemSettings } from './types';
@@ -23,92 +14,56 @@ import Login from './components/Login';
 import Layout from './components/Layout';
 
 export default function App() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let unsubscribeSettings: (() => void) | null = null;
+    let unsubscribeWorker: (() => void) | null = null;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-      // Cleanup previous settings listener if any
-      if (unsubscribeSettings) {
-        unsubscribeSettings();
-        unsubscribeSettings = null;
-      }
-
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        
-        // Listen to global settings - Only when signed in to avoid permission errors
-        unsubscribeSettings = onSnapshot(doc(db, "settings", "global"), async (snap) => {
-          if (snap.exists()) {
-            setSettings(snap.data() as SystemSettings);
-          } else {
-            // Initialize default settings
-            const defaultSettings: SystemSettings = {
-              usdRate: 36.5,
-              eurRate: 39.2,
-              lastUpdated: new Date().toISOString(),
-              updatedBy: "system-init"
-            };
-            await setDoc(doc(db, "settings", "global"), defaultSettings);
-            setSettings(defaultSettings);
-          }
-        });
-
-        // Sync user profile
-        try {
-          const workerDoc = await getDoc(doc(db, "workers", firebaseUser.uid));
-          const isBootstrapAdmin = firebaseUser.email === "cesar.guaimare@gmail.com";
-          
-          if (workerDoc.exists()) {
-            const existingWorker = workerDoc.data() as Worker;
-            // Auto-upgrade to admin if it's the specific user
-            if (isBootstrapAdmin && existingWorker.role !== UserRole.ADMIN) {
-              const upgradedWorker = { ...existingWorker, role: UserRole.ADMIN };
-              await setDoc(doc(db, "workers", firebaseUser.uid), upgradedWorker, { merge: true });
-              setWorker(upgradedWorker);
-            } else {
-              setWorker(existingWorker);
-            }
-          } else {
-            // Create new profile
-            const newWorker: Worker = {
-              uid: firebaseUser.uid,
-              displayName: firebaseUser.displayName || "Empleado",
-              email: firebaseUser.email || "",
-              role: isBootstrapAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
-              createdAt: new Date().toISOString()
-            };
-            await setDoc(doc(db, "workers", firebaseUser.uid), newWorker);
-            setWorker(newWorker);
-          }
-        } catch (profileError) {
-          console.error("Profile sync error:", profileError);
-          // Minimum worker profile for bootstrap user even if Firestore fails (unlikely now with rules fix)
-          if (firebaseUser.email === "cesar.guaimare@gmail.com") {
-            setWorker({
-              uid: firebaseUser.uid,
-              displayName: firebaseUser.displayName || "Admin",
-              email: firebaseUser.email || "",
-              role: UserRole.ADMIN,
-              createdAt: new Date().toISOString()
-            });
-          }
-        }
+    // 1. Listen to global settings
+    unsubscribeSettings = onSnapshot(doc(db, "settings", "global"), async (snap) => {
+      if (snap.exists()) {
+        setSettings(snap.data() as SystemSettings);
       } else {
-        setUser(null);
-        setWorker(null);
-        setSettings(null);
+        // Initialize default settings
+        const defaultSettings: SystemSettings = {
+          usdRate: 36.5,
+          eurRate: 39.2,
+          lastUpdated: new Date().toISOString(),
+          updatedBy: "system-init"
+        };
+        await setDoc(doc(db, "settings", "global"), defaultSettings);
+        setSettings(defaultSettings);
       }
-      setLoading(false);
     });
 
+    // 2. Read local session worker ID
+    const storedWorkerId = localStorage.getItem('session_worker_id');
+    if (storedWorkerId) {
+      // Keep a real-time subscription to the worker document
+      unsubscribeWorker = onSnapshot(doc(db, "workers", storedWorkerId), (snap) => {
+        if (snap.exists()) {
+          setWorker(snap.data() as Worker);
+        } else {
+          // Worker was deleted or doesn't exist anymore
+          localStorage.removeItem('session_worker_id');
+          setWorker(null);
+        }
+        setLoading(false);
+      }, (err) => {
+        console.error("Worker sync error:", err);
+        setLoading(false);
+      });
+    } else {
+      setWorker(null);
+      setLoading(false);
+    }
+
     return () => {
-      unsubscribeAuth();
       if (unsubscribeSettings) unsubscribeSettings();
+      if (unsubscribeWorker) unsubscribeWorker();
     };
   }, []);
 
@@ -120,17 +75,8 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <Login />;
-  }
-
-  // Guard: Don't render dashboard until worker profile is synchronized
   if (!worker) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
-      </div>
-    );
+    return <Login />;
   }
 
   return (

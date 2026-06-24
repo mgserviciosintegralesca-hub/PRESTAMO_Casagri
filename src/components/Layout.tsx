@@ -13,6 +13,11 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, worker, settings }: LayoutProps) {
+  const handleLogout = () => {
+    localStorage.removeItem('session_worker_id');
+    window.location.reload();
+  };
+
   return (
     <div className="h-screen bg-slate-50 flex overflow-hidden font-sans text-slate-900">
       {/* Left Navigation Rail */}
@@ -33,7 +38,7 @@ export default function Layout({ children, worker, settings }: LayoutProps) {
 
         <div className="mt-auto flex flex-col gap-6 pb-2">
           <button 
-            onClick={() => signOut(auth)}
+            onClick={handleLogout}
             className="p-2 text-slate-400 hover:text-red-400 transition-colors"
           >
             <LogOut className="w-6 h-6" />
