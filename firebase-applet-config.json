@@ -1,10 +1,9 @@
 {
-  "projectId": "knotted-cinema-807pf",
-  "appId": "1:177283670779:web:4d541c22822d80e346c65e",
-  "apiKey": "AIzaSyD_rlQsDOdRU2uEUxr7K6QLqPPeG0CQPKw",
-  "authDomain": "knotted-cinema-807pf.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-7281a33a-b6fb-448d-b9e5-7effdf4ca87d",
-  "storageBucket": "knotted-cinema-807pf.firebasestorage.app",
-  "messagingSenderId": "177283670779",
-  "measurementId": ""
+  "apiKey": "AIzaSyA5SSsar1aJWgKpkKHZUouNn4mIxHHzrbM",
+  "authDomain": "prestamo-b14d7.firebaseapp.com",
+  "projectId": "prestamo-b14d7",
+  "storageBucket": "prestamo-b14d7.firebasestorage.app",
+  "messagingSenderId": "889953353964",
+  "appId": "1:889953353964:web:f8629960d19a40e318e5c9",
+  "measurementId": "G-2M4KVW9YQY"
 }
