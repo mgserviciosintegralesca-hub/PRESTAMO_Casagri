@@ -89,7 +89,7 @@ export default function GlobalAuditModal({ onClose, settings }: Props) {
     doc.text(`Empresa: ${settings?.companyName || 'SISTEMA DE PRESTAMOS'}`, 14, 20);
 
     // Summary Table
-    autoTable(doc, {
+    (doc as any).autoTable({
       startY: 25,
       head: [['Métrica', 'USD ($)', 'EUR (€)']],
       body: [
