@@ -1,0 +1,6 @@
+{
+  "name": "SISTEMA PARA CONTROL DE PRESTAMOS",
+  "description": "Gestión avanzada de préstamos a trabajadores con indexación multi-moneda (USD/EUR) a tasa BCV, historial de pagos y reportes detallados.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

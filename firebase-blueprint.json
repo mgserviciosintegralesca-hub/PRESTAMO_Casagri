@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "Worker": {
+      "title": "Worker",
+      "description": "Company employee who can request loans",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "idNumber": { "type": "string", "description": "National ID / Cédula" },
+        "department": { "type": "string" },
+        "cargo": { "type": "string" },
+        "sucursal": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "employee"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Loan": {
+      "title": "Loan",
+      "description": "A loan granted to a worker",
+      "type": "object",
+      "properties": {
+        "workerId": { "type": "string" },
+        "workerName": { "type": "string" },
+        "amountForeign": { "type": "number", "description": "Amount in USD or EUR" },
+        "currency": { "type": "string", "enum": ["USD", "EUR"] },
+        "rateAtAgreement": { "type": "number", "description": "BCV rate at the time of creation" },
+        "motiveId": { "type": "string" },
+        "subMotiveId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "active", "completed"] },
+        "totalInstallments": { "type": "integer" },
+        "repaymentFrequency": { "type": "string", "enum": ["monthly", "biweekly"] },
+        "remainingInstallments": { "type": "integer" },
+        "guaranteeInfo": { "type": "string" },
+        "repaymentSchedule": { "type": "array" },
+        "requestedBy": { "type": "string" },
+        "approvedBy": { "type": "string" },
+        "rejectedBy": { "type": "string" },
+        "rejectionReason": { "type": "string" },
+        "disbursementDate": { "type": "string", "format": "date-time" },
+        "disbursementReference": { "type": "string" },
+        "disbursementBy": { "type": "string" },
+        "disbursementProofUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["workerId", "amountForeign", "currency", "status"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "A payment installment made towards a loan",
+      "type": "object",
+      "properties": {
+        "loanId": { "type": "string" },
+        "workerId": { "type": "string" },
+        "amountBs": { "type": "number", "description": "Amount paid in Bolívares" },
+        "amountForeign": { "type": "number", "description": "Equivalent in USD/EUR" },
+        "rateApplied": { "type": "number", "description": "BCV rate at time of payment" },
+        "paymentDate": { "type": "string", "format": "date-time" },
+        "referenceNumber": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed"] },
+        "registeredBy": { "type": "string" }
+      },
+      "required": ["loanId", "workerId", "amountBs", "amountForeign", "rateApplied"]
+    },
+    "Motive": {
+      "title": "Loan Motive",
+      "description": "Category and subcategories for loans",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "subMotives": { "type": "array" }
+      },
+      "required": ["name"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "System or automated notification for a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["payment_due", "payment_confirmed", "system"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "type", "read", "createdAt"]
+    },
+    "Settings": {
+      "title": "System Settings",
+      "description": "Global settings like current exchange rates",
+      "type": "object",
+      "properties": {
+        "usdRate": { "type": "number" },
+        "eurRate": { "type": "number" },
+        "usdtRate": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/workers/{workerId}": {
+      "schema": "Worker",
+      "description": "Workers collection"
+    },
+    "/loans/{loanId}": {
+      "schema": "Loan",
+      "description": "Loans collection"
+    },
+    "/loans/{loanId}/payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "Payments subcollection under a loan"
+    },
+    "/motives/{motiveId}": {
+      "schema": "Motive",
+      "description": "Loan motives collection"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications collection"
+    },
+    "/settings/global": {
+      "schema": "Settings",
+      "description": "Global settings"
+    }
+  }
+}
